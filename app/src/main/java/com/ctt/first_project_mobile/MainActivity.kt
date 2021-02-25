@@ -1,10 +1,15 @@
 package com.ctt.first_project_mobile
 
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import com.ctt.first_project_mobile.model.Usuario
 
@@ -13,9 +18,20 @@ class MainActivity : AppCompatActivity() {
 //    CICLOS DE VIDA: Nasce (Comeca), Cresce (Executa) e Morre (Encerra)
 
     private val CICLO_VIDA ="CICLO_VIDA"
+//    BOAS PRATICAS, deixar as variaveis utilizadas na Activity aqui fora
+//    Mas esses campos so vao existir quando a Activity for criada -> no onCreate
+//    declarar sem inicializar -> lateinit
+
+    private lateinit var buttonCadastrar : Button
+    private lateinit var nomeUsuario : EditText
+    private lateinit var idadeUsuario : EditText
+    private lateinit var fotoUsuario : ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+//        all our code is here
+
 //        para saber se esta linkado corretamente
 //        R -> res
         setContentView(R.layout.activity_main)
@@ -32,9 +48,10 @@ class MainActivity : AppCompatActivity() {
 //        para achar a view com a qual esta relacionada -> pelo id
 //        colocar o tipo de elemento e o id dele
 //        para referenciar, achar o componente no xml e integrar com kotlin
-        val buttonCadastrar = findViewById<Button>(R.id.btnCadastrar)
-        val nomeUsuario = findViewById<EditText>(R.id.edtNomeUsuario)
-        val idadeUsuario = findViewById<EditText>(R.id.edtIdadeUsuario)
+        buttonCadastrar = findViewById(R.id.btnCadastrar)
+        nomeUsuario = findViewById(R.id.edtNomeUsuario)
+        idadeUsuario = findViewById(R.id.edtIdadeUsuario)
+        fotoUsuario = findViewById(R.id.imgUsuario)
 
         var contador = 0
 
@@ -70,26 +87,101 @@ class MainActivity : AppCompatActivity() {
 //            exibirMensagem(mensagem)
         }
 
+        fotoUsuario.setOnClickListener{
+            abrirCamera()
+        }
+
 //        existe outra forma de referenciar via kotlin
 //        btnCadastrar
+    }
 
-        // todo nosso codigo esta aqui
+    fun abrirCamera() {
+        val CAMERA_REQUEST_CODE = 12345
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+//            utilizar algo ou recurso que nao tenha no celular do usuario -> recurso nao existe
+//            se chamar a activity direto -> null
+//            se der null -> app crash
+//            portanto checa se existe uma activity de camera nessa action para nosso app
+//            packageManager -> gerenciador de arquivos/pacotes do android -> verificar se existe a activity para a acao
+//            por ser android, cada fabricante lida de forma diferente -> cada uma modifica a sua maneira e pode levar a erros
+
+//          quando o usuario nao da a permissao, teria que fazer uma nova validacao para o permissionamento
+
+        if (cameraIntent.resolveActivity(packageManager) != null) {
+//                Inicie a camera
+//                startActivity nao vai funcionar pois quero que me retorne algo -> foto
+//                startActivity(cameraIntent)
+//                quando queremos o resultado dessa activity
+            startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE)
+        } else {
+            Toast.makeText(this, "Opa, alguma coisa aconteceu... tente novamente!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+//        por boas praticas, foi declarado do lado de fora
+//        val userImg = findViewById<ImageView>(R.id.imgUsuario)
+
+//        Verificando se o dado que esta vindo e do tipo camera que eu pedi, conforme determinado na funcao abrir camera e constante CAMERA_REQUEST_CODE
+//        Verificando se nao houve erros durante a tirada da foto
+        if (requestCode == 12345 && resultCode == RESULT_OK) {
+//            val imagem = data?.extras?.get("data") as Bitmap?
+
+            val imagem = data?.extras?.get("data") as Bitmap
+
+//            se der null, nao cai aqui -> se nao for bitmap ou algum erro ocorrer
+//            o null safety nao funcionou, entao deixar sem
+//            imagem?.let {
+//                userImg.setImageBitmap(imagem)
+//            }
+
+            fotoUsuario.setImageBitmap(imagem)
+        }
     }
 
     fun exibirMensagem(nome : String) {
 //        context -> onde voce esta, da onde que esta vindo esse makeText -> da app, dessa tela?
         Toast.makeText(this, "Boas vindas, $nome", Toast.LENGTH_SHORT).show()
     }
+
     fun exibirUsuario(usuario: Usuario) {
 //        para trabalhar com logs -> console
-        Log.e("USUARIO", usuario.toString())
+//        Log.e("USUARIO", usuario.toString())
 
-        Toast.makeText(this, "Boas vindas, ${usuario.nome}. Seu id eh ${usuario.id}.", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this, "Boas vindas, ${usuario.nome}. Seu id eh ${usuario.id}.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Usuario cadastrado com sucesso", Toast.LENGTH_SHORT).show()
+
+        redirecionar(usuario)
     }
 
 
     fun exibirMensagemErro() {
         Toast.makeText(this, "Por favor, insira o nome do usuario", Toast.LENGTH_SHORT).show()
+    }
+
+    fun redirecionar(usuario: Usuario) {
+//        Intent(aonde eu estou (CONTEXT this), para onde eu vou (CLASS)
+//        CUIDADO! A classe precisa ser ::class.java pois a Intent pede uma (C)lass
+//        Se pudesse passar uma classe KOTLIN, poderia chamar atraves do ::class
+//        Porem o parametro seria do tipo (KC)lass
+
+//        precisa de uma chava para mandar para a proxima activity
+//        vamos utilizar do extras para enviar, diferente do utilizado antes para get
+
+        val chaveNomeUsuario = "NOME"
+        val chaveIdadeUsuario = "IDADE"
+
+        val destinoActivity = Intent(this, UserActivity::class.java)
+        destinoActivity.putExtra(chaveNomeUsuario, usuario.nome)
+        destinoActivity.putExtra(chaveIdadeUsuario, usuario.idade)
+
+//        Inicia uma nova Activity
+        startActivity(destinoActivity)
+
+//        Encerra Activity ATUAL (MainActivity)
+        finish()
     }
 
 //    app iniciando
@@ -118,6 +210,13 @@ class MainActivity : AppCompatActivity() {
     override fun onRestart() {
         super.onRestart()
         Log.e(CICLO_VIDA, "App em onRestart")
+    }
+
+//    quando clica para voltar a pagina
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        Toast.makeText(this, "Tchau!", Toast.LENGTH_SHORT).show()
     }
 
 //    quando fecha a aplicacao
