@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var idadeUsuario : EditText
     private lateinit var fotoUsuario : ImageView
 
+//    boas praticas -> lateinit significa que vai ter um valor atribuido futuramente, mas a foto nao, eh opcional, por isso nao utilizamos e ja atribuimos um valor a ela
+    private var foto : Bitmap? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -76,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
 //                    esta incrementando depois o contador -> contador++
 //                esta incrementando antes o contador -> ++contador
-                    val usuario = Usuario(++contador, nomeDigitado, idadeDigitada.toInt())
+                    val usuario = Usuario(++contador, nomeDigitado, idadeDigitada.toInt(), foto)
                     exibirUsuario(usuario)
 //                exibirMensagem(nomeDigitado)
                 }
@@ -129,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 12345 && resultCode == RESULT_OK) {
 //            val imagem = data?.extras?.get("data") as Bitmap?
 
-            val imagem = data?.extras?.get("data") as Bitmap
+            foto = data?.extras?.get("data") as Bitmap
 
 //            se der null, nao cai aqui -> se nao for bitmap ou algum erro ocorrer
 //            o null safety nao funcionou, entao deixar sem
@@ -137,7 +140,7 @@ class MainActivity : AppCompatActivity() {
 //                userImg.setImageBitmap(imagem)
 //            }
 
-            fotoUsuario.setImageBitmap(imagem)
+            fotoUsuario.setImageBitmap(foto)
         }
     }
 
@@ -170,12 +173,24 @@ class MainActivity : AppCompatActivity() {
 //        precisa de uma chava para mandar para a proxima activity
 //        vamos utilizar do extras para enviar, diferente do utilizado antes para get
 
-        val chaveNomeUsuario = "NOME"
-        val chaveIdadeUsuario = "IDADE"
+//        val chaveNomeUsuario = "NOME"
+//        val chaveIdadeUsuario = "IDADE"
+
+//        criar apenas uma chave para o usuario pois vamos passar o objeto por inteiro
+        val chaveUsuario = "USUARIO"
 
         val destinoActivity = Intent(this, UserActivity::class.java)
-        destinoActivity.putExtra(chaveNomeUsuario, usuario.nome)
-        destinoActivity.putExtra(chaveIdadeUsuario, usuario.idade)
+//        ao inves de passar como extra cada propriedade separadamente -> passar o objeto
+//        destinoActivity.putExtra(chaveNomeUsuario, usuario.nome)
+//        destinoActivity.putExtra(chaveIdadeUsuario, usuario.idade)
+
+//        classe usuario eh um tipo de dado vindo do meu projeto
+//        android nao sabe o tipo de dado que eh
+//        para resolver esse problema -> funcao do Kotlin parsialize
+//        vai pegar a classe e transformar para algo que o android entenda ("cryptographing")
+//        idem a serialize do java
+//        converte o formato por baixo dos panos para o android entender que eh uma classe personalizada
+        destinoActivity.putExtra(chaveUsuario, usuario)
 
 //        Inicia uma nova Activity
         startActivity(destinoActivity)
