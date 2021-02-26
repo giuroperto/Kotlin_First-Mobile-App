@@ -2,6 +2,7 @@ package com.ctt.first_project_mobile
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import com.ctt.first_project_mobile.databinding.ActivityUserBinding
 import com.ctt.first_project_mobile.model.Usuario
@@ -35,13 +36,21 @@ class UserActivity : AppCompatActivity() {
             "\nNome: ${usuario.nome}," +
             "\nIdade: ${usuario.idade}"
 
+    Log.e("FOTO", usuario.foto.toString())
+
     imgUsuario.setImageBitmap(usuario.foto)
 
 //    evitar processamento desnecessario -> verificacao
-        usuario.foto?.let{
-    //    it = tudo que eu falei antes do .let
-    //    imgUsuario.setImageBitmap(usuario.foto)
-            imgUsuario.setImageBitmap(it)
-        }
+
+    if (usuario.foto != null) {
+        imgUsuario.setImageBitmap(usuario.foto)
+    } else {
+        imgUsuario.setImageResource(R.drawable.ic_eevee)
+    }
+//        usuario.foto?.let{
+//    //    it = tudo que eu falei antes do .let
+//    //    imgUsuario.setImageBitmap(usuario.foto)
+//            imgUsuario.setImageBitmap(it)
+//        }
     }
 }

@@ -3,6 +3,9 @@ package com.ctt.first_project_mobile
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
@@ -79,9 +82,11 @@ class MainActivity : AppCompatActivity() {
                 } else {
 //                    esta incrementando depois o contador -> contador++
 //                esta incrementando antes o contador -> ++contador
+
                     val usuario = Usuario(++contador, nomeDigitado, idadeDigitada.toInt(), foto)
                     exibirUsuario(usuario)
-//                exibirMensagem(nomeDigitado)
+//                  exibirMensagem(nomeDigitado)
+
                 }
             }
 

@@ -63,6 +63,7 @@
         android:layout_gravity="center"
         android:layout_margin="24dp"
         android:textAlignment="center"
+        android:textColor="@color/black"
         tools:text="ID: 1, nome: Giulia, 29 anos, testando texto com mais de uma linha"
         />
 
